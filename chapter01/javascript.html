@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 호이스팅
+        travel = 'No plan';
+        var travel;
+        console.log(travel);
+
+        function travel(){
+            console.log('Traveling');
+        }
+        //travel();
+        // 이 경우 function을 제일 위로 올리고,
+        // 변수 선언을 함수 선언 아래에 위치시키므로
+        // travel();는 에러 발생
+
+        // 아래의 경우 함수 선언방식이 아닌 변수 선언방식으로
+        // 함수를 만든것이므로 상단으로 가지 않기때문에
+        // 정상적으로 출력됨
+        var travel = function(){
+            console.log('Traveling');
+        }
+        travel();
+
+        function workout(){
+            goToGym();
+            var goToGym = function(){
+                console.log('Workout in Gym A');
+            }
+            return;
+            function goToGym(){
+                console.log('Workout in Gym B');
+            }
+            // 이와같이 return 다음에 함수를 선언하여도
+            // 상단으로 올리기 때문에 OK
+        }
+        workout();
+    </script>
+
+    <script>
+        // 블록 스코프, let, const
+        // ES6에서는 변수를 정의하는 데 let, 상수를 정의하는 데 const => 이들은 블록 레벨의 스코프
+        function workout(){
+            let gym = 'Gym A';
+
+            const gymStatuses = {'Gym A' : 'open', 'Gym B' : 'open', 'Gym C' : 'closed'};
+            for(let gym in gymStatuses){
+                console.log(gym + ' is ' + gymStatuses[gym]);
+            }
+
+            {
+                const gym = 'Gym B';
+                console.log('Workout in ' + gym);
+                // 다음은 throw TypeError를 던질 것이다.
+                // 상수에 값을 대입하려 했으므로.
+                // gym = 'Gym C';
+            }
+
+            console.log('Workout in ' + gym);
+
+            {
+                function gym(){
+                    console.log('Workout in a separate gym');
+                }
+                gym();
+            }
+            
+
+            if(gymStatuses[gym] == 'open'){
+                let exercises = ['Treadmill', 'Pushup', 'Spinning'];
+            }
+            // 여기서는 exercises에 접근할 수 없다.
+            // console.log(exercises);
+
+            try {
+                let gym = 'Gym C';
+                console.log('Workout in ' + gym);
+                throw new Error('Gym is closed');
+            } catch (err) {
+                console.log(err);
+                let gym = 'Gym D';
+                console.log('Workout in ' + gym);
+            }
+        }
+        workout();
+    </script>
+
+    <script>
+        // 클래스
+        // 클래스 구문으로 생성자를 생성하고 상위 클래스로부터 확장하고 정적 메소드를 생성할 수 있으며, 게터, 세터도 생성할 수 있음
+        class User {
+            constructor(name, interests){
+                this.name = name;
+                this.interests = interests;
+            }
+            greeting(){
+                console.log('Hi, I\'m ' + this.name + '.');
+            }
+            get interestsCount(){
+                return this.interests ? this.interests.length : 0;
+            }
+        }
+
+        class TeamMember extends User{
+            constructor(name, interests){
+                super(name, interests);
+                this._tasks = [];
+                this._welcomText = 'Welcome to the team!';
+            }
+            greeting(){
+                console.log('I\'m ' + this.name + ', ' + this._welcomText);
+            }
+            work(){
+                console.log('I\'m working on ' + this._tasks.length + ' tasks.');
+            }
+            set tasks(tasks){
+                let acceptedTasks = [];
+                if(tasks.length > TeamMember.maxTasksCapacity()){
+                    acceptedTasks = tasks.slice(0, TeamMember.maxTasksCapacity());
+                    console.log('It\'s over max capacity. Can only take two.');
+                } else {
+                    acceptedTasks = tasks;
+                }
+                this._tasks = this._tasks.concat(acceptedTasks);
+            }
+            static maxTasksCapacity(){
+                return 2;
+            }
+        }
+
+        console.log('===============================================');
+
+        let member = new TeamMember('Sunny', ['Traveling']);
+        member.greeting();
+        member.tasks = ['Buy three tickets', 'Book a hotel', 'Rent a car'];
+        member.work();
+        console.log(member.interestsCount);
+        member.interestsCount = 2;
+        console.log(member.interestsCount);
+        console.log(member.tasks);
+
+        User.prototype.eat = function(){
+            console.log('What will I have for lunch?');
+        };
+        member.eat();
+    </script>
+
+    <script>
+        console.log('===============================================');
+        //강화된 객체 리터럴
+        const advice = 'Stay hungry. Stay foolish.';
+
+        let advisor = {
+            __proto__ : new TeamMember('Adam', ['Consulting']),
+            advice,
+            greeting(){
+                super.greeting();
+                console.log(this.advice);
+            },
+            [advice.split('.')[0]]: 'Always learn more'
+        };
+
+        console.log(TeamMember.prototype.isPrototypeOf(advisor));
+        console.log(advisor instanceof TeamMember);
+
+        advisor.greeting();
+    </script>
+
+    <script>
+
+        console.log('===============================================');
+        // 화살표 함수
+        const fruits = [{name: 'apple', price: 100}, {name: 'orange', price: 80}, {name: 'banana', price: 120}];
+
+        // 변형 1
+        // 인자가 없을 때 빈 괄호 세트()가 필요하다
+        var countFruits = () => fruits.length;
+        console.log(countFruits(fruits));
+        // ES5 코드
+        var countFruits = function(){
+            return fruits.length;
+        };
+        console.log(countFruits(fruits));
+        
+        // 변형 2
+        // 하나의 인자가 있을 때 괄호는 생략할 수 있다
+        // 표현식의 값은 함수의 반환 값이다
+        console.log(fruits.filter(fruit => fruit.price > 100));
+        // ES5 코드
+        fruits.filter(function(fruit){
+            return fruit.price > 100;
+        });
+
+        // 변형 3
+        // 함수가 객체 리터럴을 반환할 때 괄호로 감싸야 한다
+        var inventory = fruits.map(fruit => ({name: fruit.name, storage: 1}));
+        console.log(inventory);
+        // ES5 코드
+        var inventory = fruits.map(function(fruit){
+            return {
+                name : fruit.name,
+                storage: 1
+            };
+        });
+
+        // 변형 4
+        // 화살표 함수가 구문들로 이뤄진 본문을 가지고 있고 결과를 반환해야 할 때 return 구문이 필요하다.
+        var inventory = fruits.map(fruit => {
+            console.log('Checking ' + fruit.name + ' storage');
+            return {name: fruit.name, storage : 1};
+        })
+        // ES5 코드
+        var inventory = fruits.map(function(fruit){
+            console.log('Checking ' + fruit.name + ' storage');
+            return {name: fruit.name, storage : 1};
+        })
+
+        // 자신의 this를 가지지 않는다
+        console.log('===============================================');
+        var shoppingCart = {
+            items: ['Apple', 'Orange'],
+            inventory: {Apple: 1, Orange: 0},
+            checkout(){
+                this.items.forEach(item => {
+                    if(!this.inventory[item]){
+                        console.log('Item ' + item + ' has sold out.');
+                    }
+                })
+            }
+        }
+        shoppingCart.checkout();
+
+        // ES5 코드
+        var shoppingCart = {
+            items: ['Apple', 'Orange'],
+            inventory: {Apple: 1, Orange: 0},
+            checkout(){
+                // 컨텍스트를 재할당하고 forEach에 전달할 콜백에서
+                // 참조할 수 있도록 클로저를 활용한다.
+                var that = this;
+                this.items.forEach(function (item) {
+                    if(!that.inventory[item]){
+                        console.log('Item ' + item + ' has sold out.');
+                    }
+                })
+            }
+        }
+        shoppingCart.checkout();
+    </script>
+        
+    <script>
+        console.log('===============================================');
+        // 객체 비구조화
+        let user = {name:'Sunny', interests: ['Traveling', 'Swimming']};
+        // let{name, interests, tasks} = user;
+        // console.log(name);
+        // console.log(interests);
+        // console.log(tasks);
+
+        let {name, interests, tasks=[]} = user;
+        console.log(tasks);
+        console.log('===============================================');
+        // 배열 비구조화
+        console.log('===============================================');
+        // 중첩 비구조화
+        console.log('===============================================');
+        // 나머지 요소
+    </script>
+</body>
+</html>
