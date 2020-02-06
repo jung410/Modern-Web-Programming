@@ -554,7 +554,7 @@
     <script>
         console.log('===============================================');
         // 객체 비구조화
-        let user = {name:'Sunny', interests: ['Traveling', 'Swimming']};
+        //let user = {name:'Sunny', interests: ['Traveling', 'Swimming']};
         // let{name, interests, tasks} = user;
         // console.log(name);
         // console.log(interests);
@@ -564,10 +564,99 @@
         console.log(tasks);
         console.log('===============================================');
         // 배열 비구조화
+        let [first, second] = ['Traveling', 'Swimming', 'Shopping'];
+        console.log(first);
+        console.log(second);
+        let [,,third, fourth='기본값'] = ['Traveling', 'Swimming', 'Shopping'];
+        console.log(third);
+        console.log(fourth);
         console.log('===============================================');
         // 중첩 비구조화
+        // let user3 = {name:'Sunny', interests:['Traveling', 'Swimming']};
+        // let {interets:[,second3]} = user3;
         console.log('===============================================');
         // 나머지 요소
+        // 함수 매개변수 비구조화
+        function workout({gym}, times){
+            console.log('Workout in ' + gym + ' for ' + times + ' times');
+        }
+        let thisWeek = {gym: 'Gym A'};
+        workout(thisWeek, 2);
+
+        function workout({gym, todos=['Treadmill']}){
+            let [first] = todos;
+            console.log('Start ' + first + ' in ' + gym);
+        }
+        let today = {gym: 'Gym A', todos: ['Treadmill']};
+        workout(today);
+        workout({gym: 'Gym B'});
+        console.log('===============================================');
+        // 템플릿 리터럴
+        // let user3 = {
+        //     name: 'Ted',
+        //     greeting(){
+        //         console.log(Hello, I'm ${this.name}.);
+        //     }
+        // };
+        // user3.greeting();
+    </script>
+
+    <script>
+        // 모듈
+    </script>
+
+    <script>
+        // 프로미스
+        // 비동기 작업의 최종 결과를 표현한다.
+        // .then() .catch()
+        function getProjects(callback){
+            // 서버 API를 호출하는 데 setTimeout을 활용
+            setTimeout(() => {
+                callback([{id: 1, name: 'Project A'}, {id: 2, name: 'Project B'}]);
+            }, 100);
+        }
+        function getTasks(projects, callback){
+            // 서버 API를 호출하는 데 setTiemout을 활용
+            setTimeout(() => {
+                // 구체적인 프로젝트의 작업 반환
+                callback([{id: 1, projectId: 1, title: 'Task A'}, {id: 2, projectId: 2, title: 'Task B'}]);
+            }, 100);
+        }
+        function render({projects, tasks}){
+            console.log(`Render ${projects.length} projects and ${tasks.length} tasks`);
+        }
+        getProjects((projects) => {
+            getTasks(projects, (tasks) =>{
+                render({projects, tasks})
+            });
+        });
+        // 콜백 지옥!
+        
+        // 프로미스를 활용한 버전
+        function getProjects(){
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve([{id: 1, name: 'Project A'}, {id: 2, name: 'Project B'}]);
+                }, 100);
+            });
+        }
+        function getTasks(projects){
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    // 구체적인 프로젝트의 작업 반환
+                    resolve({projects, tasks: ['Buy three tickets', 'Book a hotel']});
+                }, 100);
+            })
+        }
+        function render({projects, tasks}){
+            console.log(`Render ${projects.length} projects and ${tasks.length} tasks`);
+        }
+        getProjects()
+            .then(getTasks)
+            .then(render)
+            .catch((error) => {
+                console.log('Hanlding error', error);
+            })
     </script>
 </body>
 </html>
