@@ -8,6 +8,302 @@
 </head>
 <body>
     <script>
+        // 함수와 메서드
+        var workout = function() {};
+        console.log(workout instanceof Function);
+
+        function User() { 
+            console.log("asdf");
+        }
+        var user = new User();
+        console.log(user);
+
+        // new를 활용한 Object 생성자 호출
+        var user = new Object();
+        user.name = "sunny";
+        user.interests =['Treveling', 'Swimming'];
+        user.greeting = function(){
+            console.log('Hi, I\'m ' + this.name + '.');
+            console.log("and my interests is " + this.interests);
+        };
+        user.greeting();
+
+        // but 더 간결한 객체 리터럴을 활용함
+        var user = {
+            name : 'minyoung',
+            interests : ['coding', 'game'],
+            greeting : function(){
+                console.log('Hi, I\'m ' + this.name + '.');
+                console.log("and my interests is " + this.interests);
+            }   
+        }
+        user.greeting();
+
+        // 객체 리터럴에서 getter와 setter 접근자를 지원함
+        var user = {
+            get role(){
+                return 'Engineer';
+            }
+        }
+        console.log(user.role);
+
+        // role 프로퍼티의 setter 접근자가 없으므로 값은 변경되지 않는다.
+        user.role = 'asdf';
+        console.log(user.role);
+
+        // 생성자 함수 생성
+        function User(name, interests){
+            this.name = name;
+            this.interests = interests;
+            this.greeting = function(){
+                console.log('Hi, I\'m ' + this.name + '.');
+                console.log("and my interests is " + this.interests);
+            }
+        }
+        // user 객체를 생성하는 데 new를 활용해 생성자 함수 호출
+        var user = new User('whatthe', ['game', 'sing']);
+        user.greeting();
+
+        // 위에서 생성한 User 생성자 함수와 프로토타입과 Object.create() 메서드 활용
+        var user = Object.create(User.prototype, {
+            name : {value: 'ABC'},
+            interests : {value: ['toto', 'dodo']}
+        })
+        //user.greeting();
+        User.prototype.greeting = function(){
+            console.log('Hi, I\'m ' + this.name + '.');
+            console.log("and my interests is " + this.interests);
+        }
+        user.greeting();
+
+        // 객체를 반환하는 생성 함수 사용
+        function createUser(name, interests){
+            var user = {};
+            user.name = name;
+            user.interests = interests;
+            user.greeting = function(){
+                console.log('Hi, I\'m ' + this.name + '.');
+                console.log("and my interests is " + this.interests);
+            };
+            return user;
+        }
+
+        // 매개변수를 이용해 생성 함수 호출
+        var user = createUser('ZZZZZ', ['123', '234']);
+        user.greeting();
+
+        // ES6 클래스를 이용하는 방법
+        // User 클래스 생성
+        class User2{
+            // User 생성자 함수와 상응
+            constructor(name, interests){
+                this.name = name;
+                this.interests = interests;
+            }
+            // User.prototype.greeting과 같다.
+            greeting(){
+                console.log('Hi, I\'m ' + this.name + '.');
+                console.log("and my interests is " + this.interests);
+            }
+        }
+        let user2 = new User2('DDD', ['555', '666']);
+        user2.greeting();
+    </script>
+
+    <script>
+
+        var obj = {};
+        obj['100'] = 'one hundread';
+        // 숫자 100은 '100'으로 변환된다.
+        console.log(obj['100']);
+
+        // foo와 bar 모두 문자열 '[object Object]'로 변환
+        var foo = {prop : 'f'}, bar = {prop:'p'};
+        obj[foo] = 'Foo';
+        console.log(obj[bar]);
+
+        function User(name, department){
+            var _department = department;
+            var _name = name;
+            Object.defineProperty(this, 'name', {
+                value: _name,
+                writable : true,
+                enumerable : true,
+                configurable : false
+            });
+            Object.defineProperty(this, 'department', {
+                get: function(){
+                    console.log("Retrieving department");
+                    return _department;
+                },
+                set: function(newValue){
+                    console.log('Updating department value to "' + newValue + '"');
+                    _department = newValue;
+                },
+                enumerable : true,
+                configurable : true
+            });
+            Object.defineProperty(this, 'greeting', {
+                value : function(){
+                    console.log('Hi, I\'m ' + _name + '.');
+                },
+                enumerable : true,
+                configurable: false
+            })
+
+        }
+        var user = new User('Sunny', 'Engineering');
+        console.log(user.department);
+        user.department = 'Marketing';
+        user.greeting();
+        Object.defineProperty(user, 'name', {
+            enumerable : true
+        });
+        delete user.name;
+        delete user.department;
+        for(var prop in user){
+            console.log(prop);
+        }
+    </script>
+
+    <script>
+        // 프로토타입과 상속
+        // ES5로 구현한 코드
+        function User(name, interests){
+            this.name = name;
+            this.interests = interests;
+        }
+
+        User.prototype.greeting = function(){
+            console.log('Hi, I\'m ' + _name + '.');
+        }
+
+        console.log(User.constructor === Function);
+
+        console.log(User.prototype.constructor === User);
+        var user = new User();
+        console.log(user.__proto__ === User.prototype);
+
+        function TeamMember(name, interests, tasks){
+            User.call(this, name, interests);
+            this.tasks = tasks;
+        }
+
+        TeamMember.prototype = Object.create(User.prototype);
+        TeamMember.prototype.greeting = function(){
+            console.log('Hi, I\'m ' + name + '. Welcome to the team!');
+        };
+        TeamMember.prototype.work = function(){
+            console.log('I\'m working on ' + this.tasks.length + ' tasks');
+        }
+
+        console.log(User.prototype === TeamMember.prototype);
+        console.log(User.prototype.constructor === TeamMember.prototype.constructor);
+
+        var member = new TeamMember('Sunny', ['Traveling'], ['Buy three tickets', 'Book a hotle']);
+        member.greeting();
+        member.work();
+
+        console.log(member instanceof TeamMember);
+        console.log(member instanceof User);
+        console.log(member instanceof Object);
+
+        User.prototype.eat = function(){
+            console.log('What will I have for lunch?');
+        };
+        member.eat();
+
+        // 최상위 객체에 메소드 추가
+        Object.prototype.move = function(){
+            console.log('Every object can move now');
+        };
+        member.move();
+        var alien = {};
+        alien.move();
+        User.move();
+    </script>
+
+    <script>
+        // 스코프와 클로저
+        // java 코드
+        /*
+        public class User{
+            private String name;
+            private List<String> interests;
+
+            public User(String name, List<String> interests){
+                this.name = name;
+                this.interests = interests;
+            }
+
+            // user의 interests에 somthing을 가지고 있는지 check
+            public boolean isInterestedIn(String something){
+                boolean interested = false;
+                for(int i = 0; i < interets.size(); i++){
+                    if(interets.get(i).equals(something)){
+                        intereted = true;
+                        break;
+                    }
+                }
+                return intereted;
+            }
+        }
+        */
+
+        function bookHotel(city){
+            var availableHotel = 'None';
+            for(var i = 0; i < hotels.length; i++){
+                var hotel = hotels[i];
+                if(hotel.city === city && hotel.hasRoom){
+                    availableHotel = hotel.name;
+                    break;
+                }
+            }
+
+            // 여기서 i와 hotel은 여전히 접근 가능하다.
+            console.log('Checked ' + (i + 1) + ' record(s)');
+            console.log('Last checked ' + hotel.name);
+            {
+                function placeOrder(){
+                    var totalAmount = 200;
+                    console.log('Order placed to ' + availableHotel);
+                }
+            }
+            placeOrder();
+            // 접근 불가
+            // console.log(totalAount);
+            return availableHotel;
+        }
+
+        var hotels = [{name: 'Hotel A', hasRoom : false, city: 'Sanya'}, {name: 'Hotel B', hasRoom:true, city:'Sanya'}];
+        console.log(bookHotel('Sanya'));
+        // 접근 불가
+        // console.log(availableHotel);
+
+        // this키워드
+        function User(name){
+            console.log('I\'m in "' + this.constructor.name + '" context.');
+            this.name = name;
+            this.speak = function(){
+                console.log(this.name + ' is speaking from "' + this.constructor.name + '" context.');
+                var drink = function(){
+                    console.log('Drinking in "'+ this.constructor.name + '"');
+                }
+                drink();
+            };
+            function ask(){
+                console.log('Asking from "' + this.constructor.name + '"    context.');
+                console.log('Who am I? "' + this.name + '"');
+            }
+            ask();
+        }
+  
+        var name = 'Unknown';
+        var user = new User(name);
+        user.speak();
+    </script>
+
+    <script>
         // 호이스팅
         travel = 'No plan';
         var travel;
